@@ -1,0 +1,92 @@
+:root{
+  --bg:#0b0f1a; --card:#0f1724; --text:#e6eef8; --muted:#9aa6b2; --accent:#7C5CFF;
+  --light-bg:#f5f6fa; --light-card:#fff; --light-text:#111827;
+}
+
+body {
+  margin:0; font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto; background:var(--light-bg); color:var(--light-text);
+}
+body.dark {
+  background: var(--bg); color: var(--text);
+}
+
+.nav-bar {
+  height:64px; display:flex; align-items:center; justify-content:space-between;
+  padding:0 20px; position:fixed; left:0; right:0; top:0;
+  background: rgba(255,255,255,0.02); backdrop-filter: blur(6px); z-index:60;
+  border-bottom:1px solid rgba(0,0,0,0.04);
+}
+.nav-left { display:flex; align-items:center; gap:12px; }
+.brand { font-weight:700; font-size:18px; }
+.hamburger { font-size:18px; background:transparent; border:none; cursor:pointer; }
+
+.nav-right { display:flex; align-items:center; gap:12px; }
+.switch { display:inline-block; }
+.switch input{ display:none; }
+.switch .slider{ width:36px;height:20px;border-radius:20px;background:#e2e8f0; display:inline-block; position:relative; }
+.switch input:checked + .slider { background:var(--accent); }
+.btn-ghost { padding:8px 12px;border-radius:8px;border:1px solid rgba(0,0,0,0.06); background:transparent; cursor:pointer; }
+
+.sidebar {
+  width:260px; position:fixed; left:0; top:0; bottom:0; padding-top:72px;
+  background: var(--light-card); border-right:1px solid rgba(0,0,0,0.04); transition:width .22s;
+}
+body.dark .sidebar { background:var(--card); border-right:1px solid rgba(255,255,255,0.03); }
+.sidebar.collapsed { width:80px; }
+.sidebar-brand { font-weight:800; padding:12px 18px; font-size:18px; }
+.sidebar-nav { padding:8px 12px; display:flex; flex-direction:column; gap:6px; }
+.sidebar-link { display:block; padding:10px 12px; border-radius:8px; text-decoration:none; color:var(--light-text); }
+.sidebar-link.active, .sidebar-link:hover { background:linear-gradient(90deg, rgba(124,92,255,0.14), rgba(124,92,255,0.06)); color:var(--accent); }
+
+.content-container { margin-left:260px; padding:92px 28px 28px; transition: margin-left .22s; }
+.sidebar-collapsed .content-container, .sidebar.collapsed ~ .content-container { margin-left:80px; }
+
+.auth-wrap { display:flex; align-items:center; justify-content:center; height:100vh; padding:20px; }
+.auth-card { width:380px; background:var(--light-card); border-radius:12px; padding:28px; box-shadow:0 12px 40px rgba(3,8,23,0.06); text-align:center; }
+body.dark .auth-card { background: #222; color:var(--text); }
+.auth-title { font-size:22px; margin-bottom:12px; font-weight:700; }
+.auth-input { width:100%; padding:12px 14px; margin-bottom:12px; border-radius:8px; border:1px solid #e6e6e6; }
+.auth-btn { width:100%; padding:12px; border-radius:8px; border:none; background:var(--accent); color:white; font-weight:700; }
+
+.card { background:var(--light-card); border-radius:12px; padding:18px; box-shadow:0 8px 30px rgba(3,8,23,0.04); margin-bottom:16px; }
+body.dark .card { background: #121318; }
+.page-title { font-size:24px; font-weight:700; margin-bottom:12px; }
+.card-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+.stat-title { color:#6b7280; font-weight:600; margin-bottom:6px; }
+.stat-number { font-size:28px; font-weight:800; color:var(--accent); }
+
+@media(max-width:900px){ .card-grid{ grid-template-columns:repeat(2,1fr); } .content-container{ padding:80px 14px; } }
+@media(max-width:600px){ .sidebar{ display:none; } .content-container{ margin-left:0;padding-top:140px; } .auth-card{ width:100%; } }
+
+.auth-header {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  padding: 20px 0;
+  background: #fff;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.auth-link {
+  font-size: 18px;
+  text-decoration: none;
+  color: #444;
+  padding-bottom: 5px;
+  border-bottom: 2px solid transparent;
+  transition: 0.25s;
+}
+
+.auth-link:hover {
+  color: #6a4cff;
+}
+
+.auth-link.active {
+  color: #6a4cff;
+  border-bottom: 2px solid #6a4cff;
+}
+
+.auth-wrap {
+  display: flex;
+  justify-content: center;
+  padding-top: 40px;
+}
