@@ -27,31 +27,12 @@ export default function UploadHistory() {
     loadUploads(1);
   }, []);
 
-  const nextPage = () => {
-    if (data.items.length < data.limit) return;
-    loadUploads(data.page + 1);
-  };
-
-  const prevPage = () => {
-    if (data.page === 1) return;
-    loadUploads(data.page - 1);
-  };
-
-  const fileUrl = (path) => {
-    const base = (process.env.REACT_APP_API || "http://localhost:5000")
-      .replace("/api", "");
-    return base + path;
-  };
-
   return (
     <div className="card">
       <h2 className="mb-3">Upload History</h2>
 
       {loading && <div>Loading...</div>}
-
-      {!loading && data.items.length === 0 && (
-        <div>No uploads found.</div>
-      )}
+      {!loading && data.items.length === 0 && <div>No uploads found.</div>}
 
       {!loading && data.items.map((file) => (
         <div key={file._id} className="upload-item">
@@ -65,7 +46,7 @@ export default function UploadHistory() {
 
           <a
             className="btn"
-            href={fileUrl(file.path)}
+            href={`http://localhost:5000${file.path}`}
             target="_blank"
             rel="noreferrer"
           >
@@ -74,9 +55,8 @@ export default function UploadHistory() {
         </div>
       ))}
 
-      {/* Pagination */}
       <div className="pagination">
-        <button className="btn" onClick={prevPage} disabled={data.page === 1}>
+        <button className="btn" onClick={() => loadUploads(data.page - 1)} disabled={data.page === 1}>
           Prev
         </button>
 
@@ -84,7 +64,7 @@ export default function UploadHistory() {
 
         <button
           className="btn"
-          onClick={nextPage}
+          onClick={() => loadUploads(data.page + 1)}
           disabled={data.items.length < data.limit}
         >
           Next

@@ -155,3 +155,113 @@ body.dark .card { background: #121318; }
 .auth-links a {
   color: #6b3df3;
 }
+
+:root {
+  --purple: #7b5cff;
+  --purple-light: #c9b8ff;
+  --purple-fade: rgba(123, 92, 255, 0.15);
+
+  --glass-bg: rgba(255, 255, 255, 0.12);
+  --glass-border: rgba(255, 255, 255, 0.2);
+
+  --text-dark: #1a1a1a;
+  --text-light: #fafafa;
+
+  --card-bg: rgba(255, 255, 255, 0.35);
+  --shadow-lg: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(135deg, #f6f3ff, #ebe5ff);
+  color: var(--text-dark);
+}
+
+.sidebar.collapsed .s-label {
+  display: none;
+}
+
+.sidebar.collapsed .sidebar-link {
+  justify-content: center;
+}
+
+.sidebar.collapsed ~ .content-container {
+  margin-left: 80px !important;
+}
+
+body.dark .sidebar-link {
+  color: #cfcdfc;
+}
+
+body.dark .sidebar-link.active,
+body.dark .sidebar-link:hover {
+  background: rgba(124, 92, 255, 0.35);
+  color: #ffffff;
+}
+.sidebar.collapsed .s-label {
+  display: none !important;
+}
+
+.sidebar.collapsed .sidebar-link {
+  justify-content: center !important;
+}
+
+body.dark .sidebar-link {
+  color: #cfcdfc !important;
+}
+
+body.dark .sidebar-link.active,
+body.dark .sidebar-link:hover {
+  background: rgba(124, 92, 255, 0.35) !important;
+  color: #fff !important;
+}
+.glass-card {
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 14px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 4px 25px rgba(0,0,0,0.05);
+}
+
+.stat-title {
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+.stat-number {
+  font-size: 32px;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+.stat-small {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.action-card {
+  padding: 18px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  text-decoration: none !important;
+  color: #333;
+  transition: 0.2s ease;
+}
+
+.action-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 22px rgba(0,0,0,0.08);
+}
+
+.action-title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.action-desc {
+  font-size: 13px;
+  opacity: 0.7;
+}

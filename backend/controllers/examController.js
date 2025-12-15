@@ -4,6 +4,10 @@ const Papa = require("papaparse");
 
 const Exam = require("../models/Exam");
 const Upload = require("../models/Upload");
+const ExamHall = require("../models/ExamHall");
+const SeatingPlan = require("../models/SeatingPlan");
+const User = require("../models/User");
+const { sendMail } = require("../utils/smtp");
 
 exports.createExam = async (req, res) => {
   try {
@@ -47,6 +51,70 @@ exports.updateSeats = async (req, res) => {
       { new: true }
     );
     res.json(exam);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.generateSeating = async (req, res) => {
+  try {
+    const { examId, hallId, department } = req.body;
+
+    const exam = await Exam.findById(examId);
+    if (!exam) return res.status(404).json({ message: "Exam not found" });
+
+    const hall = await ExamHall.findById(hallId);
+    if (!hall) return res.status(404).json({ message: "Hall not found" });
+
+    const students = await User.find({ role: "student", department });
+
+    if (students.length === 0)
+      return res.status(400).json({ message: "No students found" });
+
+    if (students.length > hall.capacity)
+      return res.status(400).json({ message: "Hall capacity too small" });
+
+    let allocations = [];
+    let seatIndex = 0;
+
+    for (let r = 1; r <= hall.rows; r++) {
+      for (let c = 1; c <= hall.cols; c++) {
+        if (seatIndex >= students.length) break;
+
+        let student = students[seatIndex];
+
+        let seatNumber = `R${r}-C${c}`;
+
+        allocations.push({
+          student: student._id,
+          seatNumber,
+          row: r,
+          col: c
+        });
+
+        sendMail({
+          to: student.email,
+          subject: `Exam Seating for ${exam.title}`,
+          text: `Your exam seat is assigned as:
+Hall: ${hall.hallName}
+Seat: ${seatNumber}`
+        });
+
+        seatIndex++;
+      }
+    }
+
+    const seatingPlan = await SeatingPlan.create({
+      examName: exam.title,
+      hall: hallId,
+      allocations
+    });
+
+    return res.json({
+      message: "Seating generated successfully",
+      seatingPlan
+    });
+
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -113,9 +181,7 @@ exports.uploadFile = async (req, res) => {
 
 exports.listFiles = async (req, res) => {
   try {
-    const files = await Upload.find({ exam: req.params.id }).sort({
-      createdAt: -1
-    });
+    const files = await Upload.find({ exam: req.params.id }).sort({ createdAt: -1 });
     res.json(files);
   } catch (err) {
     res.status(500).json({ error: err.message });

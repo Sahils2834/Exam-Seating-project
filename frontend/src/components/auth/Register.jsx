@@ -28,55 +28,34 @@ export default function Register() {
 
   return (
     <div className="auth-page">
-      <form className="auth-card" onSubmit={submit}>
+      <form className="glass-card auth-card" onSubmit={submit}>
         <h2 className="auth-title">Create Account</h2>
 
-        <input
-          className="auth-input"
-          placeholder="Full name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
+        <input className="auth-input" placeholder="Full Name"
+          value={name} onChange={(e) => setName(e.target.value)} />
 
-        <input
-          className="auth-input"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+        <input className="auth-input" placeholder="Email"
+          value={email} onChange={(e) => setEmail(e.target.value)} />
 
-        <input
-          type="password"
-          className="auth-input"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+        <input type="password" className="auth-input"
+          placeholder="Password" value={password}
+          onChange={(e) => setPassword(e.target.value)} />
 
-        <select
-          className="auth-input"
-          value={role}
-          onChange={(e) => setRole(e.target.value)}
-        >
+        <select className="auth-input" value={role}
+          onChange={(e) => setRole(e.target.value)}>
           <option value="student">Student</option>
           <option value="teacher">Teacher</option>
         </select>
 
         {role === "student" && (
-          <input
-            className="auth-input"
-            placeholder="Student ID / Roll Number"
-            value={rollNumber}
-            onChange={(e) => setRollNumber(e.target.value)}
-          />
+          <input className="auth-input" placeholder="Roll Number"
+            value={rollNumber} onChange={(e) => setRollNumber(e.target.value)} />
         )}
 
-        <button className="btn-primary auth-btn" type="submit">
-          Sign up
-        </button>
+        <button className="btn-primary auth-btn">Sign Up</button>
 
         <div className="auth-links">
-          <Link to="/login">Back to login</Link>
+          <Link to="/login">Back to Login</Link>
         </div>
       </form>
     </div>

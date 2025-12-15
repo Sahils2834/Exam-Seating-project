@@ -1,0 +1,74 @@
+.seating-container {
+  padding: 20px;
+}
+
+.glass-header {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 4px 20px rgba(124, 92, 255, 0.2);
+  padding: 20px;
+  border-radius: 14px;
+  margin-bottom: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+body.dark .glass-header {
+  background: rgba(20, 20, 35, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #eaeaff;
+}
+
+.glass-select {
+  padding: 10px 14px;
+  margin-top: 10px;
+  border-radius: 10px;
+  border: none;
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.seating-grid {
+  display: grid;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.glass-seat {
+  background: rgba(255, 255, 255, 0.30);
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 6px 25px rgba(124, 92, 255, 0.15);
+  transition: 0.25s ease;
+}
+
+body.dark .glass-seat {
+  background: rgba(30, 30, 55, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  color: #eaeaff;
+}
+
+.glass-seat:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 35px rgba(124, 92, 255, 0.3);
+}
+
+.seat-number {
+  font-size: 13px;
+  color: #6b6bff;
+  font-weight: 800;
+}
+
+body.dark .seat-number {
+  color: #b4a4ff;
+}
+
+.seat-student {
+  margin-top: 6px;
+  font-size: 15px;
+  font-weight: 600;
+}

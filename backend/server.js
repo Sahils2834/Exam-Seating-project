@@ -13,6 +13,7 @@ const studentRoutes = require("./routes/studentRoutes");
 const teacherRoutes = require("./routes/teacherRoutes");
 
 const app = express();
+
 app.use(express.json());
 app.use(cors());
 
@@ -21,11 +22,14 @@ async function ensureAdmin() {
     const adminEmail = process.env.ADMIN_EMAIL;
     const adminPass = process.env.ADMIN_PASS;
 
-    console.log("ensureAdmin() started");
-    console.log("Admin email:", adminEmail);
+    if (!adminEmail || !adminPass) {
+      console.log("Admin credentials missing in .env");
+      return;
+    }
+
+    console.log("Creating / Ensuring admin...");
 
     const hash = await bcrypt.hash(adminPass, 10);
-    console.log("HASH THAT SHOULD BE SAVED:", hash);
 
     const admin = await User.findOneAndUpdate(
       { email: adminEmail },
@@ -33,34 +37,33 @@ async function ensureAdmin() {
         name: "Administrator",
         email: adminEmail,
         password: hash,
-        role: "admin"
+        role: "admin",
       },
       { new: true, upsert: true }
     );
 
-    console.log("ADMIN UPSERT RESULT:", admin);
+    console.log("Admin ready:", admin.email);
 
   } catch (err) {
     console.error("ensureAdmin ERROR:", err.message);
   }
 }
 
+app.use("/api/auth", authRoutes);
+app.use("/api/admin", adminRoutes);
+app.use("/api/exams", examRoutes);
+app.use("/api/student", studentRoutes);
+app.use("/api/teachers", teacherRoutes);
+
 mongoose
   .connect(process.env.MONGO_URI)
   .then(async () => {
     console.log("MongoDB connected");
 
-    await ensureAdmin(); // make sure admin exists
+    await ensureAdmin(); // ensure admin exists
 
     app.listen(process.env.PORT, () => {
-      console.log("Server running on", process.env.PORT);
+      console.log("Server running on port", process.env.PORT);
     });
   })
   .catch((err) => console.log("MongoDB connection error:", err));
-
-
-app.use("/api/auth", authRoutes);
-app.use("/api/admin", adminRoutes);
-app.use("/api/exams", examRoutes);
-app.use("/api/student", studentRoutes);
-app.use("/api/teacher", teacherRoutes);

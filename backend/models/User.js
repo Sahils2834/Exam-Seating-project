@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
-      select: true   // IMPORTANT: allow writes & reads for admin setup
+      select: false
     },
 
     role: {
@@ -22,10 +22,9 @@ const userSchema = new mongoose.Schema(
       required: true,
     },
 
-    rollNumber: {
-      type: String,
-      sparse: true,
-    }
+    rollNumber: { type: String, sparse: true },
+
+    designation: { type: String }
   },
   { timestamps: true }
 );

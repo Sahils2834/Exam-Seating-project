@@ -3,3 +3,68 @@
 .auth-title{font-size:22px;font-weight:700;margin-bottom:12px}
 .input{width:100%;padding:10px 12px;margin-bottom:12px;border:1px solid #e6e7ee;border-radius:8px}
 .alert{color:#b91c1c;margin-bottom:8px}
+.auth-container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #f6f3ff, #ebe5ff);
+  padding: 20px;
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 16px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  animation: fadeIn 0.3s ease;
+}
+
+.auth-card {
+  width: 380px;
+  padding: 35px 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.auth-title {
+  font-size: 22px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.auth-input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  font-size: 15px;
+}
+
+.auth-input:focus {
+  border-color: #7b5cff;
+}
+
+.btn-purple {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  background: #7b5cff;
+  border: none;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.25s;
+}
+
+.btn-purple:hover {
+  background: #6a4cff;
+}
+
+.auth-links {
+  text-align: center;
+  font-size: 14px;
+}
