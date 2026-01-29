@@ -1,42 +1,98 @@
 import React, { useEffect, useState } from "react";
 import api from "../../api";
 
-export default function Requests(){
-  const [requests,setRequests] = useState([]);
+export default function Requests() {
+  const [requests, setRequests] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  useEffect(()=>{ load(); },[]);
+  useEffect(() => {
+    load();
+  }, []);
 
   const load = async () => {
-    try { const res = await api.get("/admin/requests"); setRequests(res.data); } catch(e){ console.error(e); }
+    try {
+      setLoading(true);
+      const res = await api.get("/admin/requests");
+      setRequests(res.data || []);
+    } catch (e) {
+      console.error("REQUEST LOAD ERROR:", e);
+      setRequests([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const approve = async (id) => {
-    try { await api.post(`/admin/requests/${id}/approve`); load(); }
-    catch(e){ alert("Approve failed"); }
+    try {
+      await api.post(`/admin/requests/${id}/approve`);
+      alert("User approved successfully");
+      load();
+    } catch (e) {
+      alert("Approve failed");
+    }
   };
 
   const reject = async (id) => {
-    if(!window.confirm("Reject request?")) return;
-    try { await api.post(`/admin/requests/${id}/reject`); load(); }
-    catch(e){ alert("Reject failed"); }
+    if (!window.confirm("Reject this request?")) return;
+
+    try {
+      await api.post(`/admin/requests/${id}/reject`);
+      alert("Request rejected");
+      load();
+    } catch (e) {
+      alert("Reject failed");
+    }
   };
 
   return (
-    <div>
-      <h1 className="page-title">Pending Requests</h1>
+    <div className="container p-6">
+      <h1 className="text-xl font-bold mb-4">Pending Requests</h1>
 
-      <div className="card">
-        {requests.length===0 ? <p>No pending requests</p> : requests.map(r=>(
-          <div key={r._id} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'12px 0',borderBottom:'1px solid rgba(0,0,0,0.04)'}}>
+      <div className="card p-4">
+
+        {loading && <p>Loading requests...</p>}
+
+        {!loading && requests.length === 0 && (
+          <p className="text-gray-500">No pending requests</p>
+        )}
+
+        {!loading && requests.map((r) => (
+          <div
+            key={r._id}
+            className="flex justify-between items-center py-3 border-b"
+          >
             <div>
-              <strong>{r.name}</strong><div style={{color:'#666'}}>{r.email} — {r.role}</div>
+              <strong>{r.name}</strong>
+
+              <div className="text-sm opacity-70">
+                Role: {r.role}
+              </div>
+
+              {r.role === "student" && (
+                <div className="text-xs opacity-60">
+                  Roll Number: {r.rollNumber || "N/A"}
+                </div>
+              )}
+
+              {r.email && (
+                <div className="text-xs opacity-60">
+                  Email: {r.email}
+                </div>
+              )}
             </div>
-            <div style={{display:'flex',gap:8}}>
-              <button className="btn-primary" onClick={()=>approve(r._id)}>Approve</button>
-              <button className="btn-ghost" onClick={()=>reject(r._id)}>Reject</button>
+
+            <div className="flex gap-2">
+              <button className="btn btn-primary" onClick={() => approve(r._id)}>
+                Approve
+              </button>
+
+              <button className="btn-ghost text-red-500" onClick={() => reject(r._id)}>
+                Reject
+              </button>
             </div>
           </div>
         ))}
+
       </div>
     </div>
   );

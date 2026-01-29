@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import API from "../../api";
+import api from "../../api";
 
 export default function UploadHistory() {
   const [data, setData] = useState({
@@ -14,10 +14,19 @@ export default function UploadHistory() {
   const loadUploads = async (page = 1) => {
     try {
       setLoading(true);
-      const res = await API.get(`/teachers/uploads?page=${page}&limit=10`);
-      setData(res.data);
+
+      const res = await api.get(`/teachers/uploads?page=${page}&limit=10`);
+
+      setData({
+        items: res.data.items || [],
+        page: res.data.page || 1,
+        total: res.data.total || 0,
+        limit: res.data.limit || 10
+      });
+
     } catch (err) {
       console.error("UPLOAD HISTORY ERROR:", err);
+      setData({ items: [], page: 1, total: 0, limit: 10 });
     } finally {
       setLoading(false);
     }
@@ -27,26 +36,36 @@ export default function UploadHistory() {
     loadUploads(1);
   }, []);
 
+  const totalPages = Math.ceil(data.total / data.limit);
+
   return (
-    <div className="card">
-      <h2 className="mb-3">Upload History</h2>
+    <div className="card p-4">
+      <h2 className="mb-3 text-xl font-semibold">Upload History</h2>
 
-      {loading && <div>Loading...</div>}
-      {!loading && data.items.length === 0 && <div>No uploads found.</div>}
+      {/* Loading */}
+      {loading && <div>Loading uploads...</div>}
 
+      {/* Empty */}
+      {!loading && data.items.length === 0 && (
+        <div className="text-gray-500">No uploads found.</div>
+      )}
+
+      {/* List */}
       {!loading && data.items.map((file) => (
-        <div key={file._id} className="upload-item">
+        <div key={file._id} className="upload-item flex justify-between items-center mb-3">
+
           <div>
-            <strong>{file.originalName}</strong>
-            <div className="small">
-              Exam: {file.exam?.title || "Unknown"}<br />
+            <strong>{file.originalName || file.filename}</strong>
+
+            <div className="small opacity-70">
+              Exam: {file.exam?.title || "Unknown"} <br />
               Uploaded: {new Date(file.createdAt).toLocaleString()}
             </div>
           </div>
 
           <a
-            className="btn"
-            href={`http://localhost:5000${file.path}`}
+            className="btn btn-primary"
+            href={`${process.env.REACT_APP_API_URL || "http://localhost:5000"}/uploads/${file.filename}`}
             target="_blank"
             rel="noreferrer"
           >
@@ -55,21 +74,31 @@ export default function UploadHistory() {
         </div>
       ))}
 
-      <div className="pagination">
-        <button className="btn" onClick={() => loadUploads(data.page - 1)} disabled={data.page === 1}>
-          Prev
-        </button>
+      {/* Pagination */}
+      {!loading && data.total > data.limit && (
+        <div className="pagination mt-3 flex items-center gap-3">
 
-        <span className="small">Page {data.page}</span>
+          <button
+            className="btn"
+            onClick={() => loadUploads(data.page - 1)}
+            disabled={data.page === 1}
+          >
+            Prev
+          </button>
 
-        <button
-          className="btn"
-          onClick={() => loadUploads(data.page + 1)}
-          disabled={data.items.length < data.limit}
-        >
-          Next
-        </button>
-      </div>
+          <span className="small">
+            Page {data.page} of {totalPages || 1}
+          </span>
+
+          <button
+            className="btn"
+            onClick={() => loadUploads(data.page + 1)}
+            disabled={data.page >= totalPages}
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 }

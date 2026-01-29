@@ -2,9 +2,8 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 
-export default function StudentSeating() {
+export default function TeacherSeating() {
   const { examId } = useParams();
-  const user = JSON.parse(localStorage.getItem("user"));
   const [plan, setPlan] = useState(null);
 
   useEffect(() => {
@@ -13,25 +12,15 @@ export default function StudentSeating() {
     });
   }, [examId]);
 
-  if (!plan) return <div className="page">No seating assigned yet.</div>;
-
-  const mySeat = plan.allocations.find(a => a.rollNumber === user.rollNumber);
+  if (!plan) return <div className="page">No seating data</div>;
 
   return (
     <div className="page">
-      <h2 className="page-title">Seating Plan</h2>
+      <h2 className="page-title">Hall Seating View</h2>
 
-      <div 
-        className="seat-grid"
-        style={{ gridTemplateColumns: `repeat(10, 80px)` }}
-      >
+      <div className="seat-grid" style={{ gridTemplateColumns: "repeat(10, 80px)" }}>
         {plan.allocations.map((seat, i) => (
-          <div 
-            key={i} 
-            className={`seat-box ${
-              seat.rollNumber === user.rollNumber ? "my-seat" : "occupied"
-            }`}
-          >
+          <div key={i} className="seat-box occupied">
             <div className="seat-number">{seat.seatNumber}</div>
             <div className="seat-roll">{seat.rollNumber}</div>
           </div>

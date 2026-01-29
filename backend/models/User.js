@@ -8,6 +8,8 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       unique: true,
+      lowercase: true,
+      trim: true
     },
 
     password: {
@@ -19,10 +21,14 @@ const userSchema = new mongoose.Schema(
     role: {
       type: String,
       enum: ["admin", "teacher", "student"],
-      required: true,
+      required: true
     },
 
-    rollNumber: { type: String, sparse: true },
+    rollNumber: {
+      type: String,
+      sparse: true,
+      index: true
+    },
 
     designation: { type: String }
   },

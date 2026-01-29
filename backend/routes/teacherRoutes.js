@@ -1,53 +1,81 @@
 const express = require("express");
 const router = express.Router();
+
 const { authMiddleware, requireRole } = require("../middleware/authMiddleware");
+const teacherController = require("../controllers/teacherController");
 const Upload = require("../models/Upload");
-const TeacherProfile = require("../models/TeacherProfile");
-const User = require("../models/User");
+const Exam = require("../models/Exam");
 
-router.use(authMiddleware, requireRole("teacher"));
+router.use(authMiddleware);
+router.use(requireRole("teacher"));
 
-router.get("/profile", async (req, res) => {
-  try {
-    let profile = await TeacherProfile
-      .findOne({ user: req.user._id })
-      .populate("user", "name email");
+/* PROFILE */
+router.get("/profile", teacherController.getProfile);
+router.put("/profile", teacherController.updateProfile);
 
-    if (!profile) {
-      profile = {
-        user: await User.findById(req.user._id).select("name email"),
-        department: ""
-      };
-    }
-
-    res.json(profile);
-
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
+/* UPLOAD HISTORY */
 router.get("/uploads", async (req, res) => {
   try {
-    const page = Number(req.query.page || 1);
-    const limit = Number(req.query.limit || 10);
+    const page = Math.max(Number(req.query.page || 1), 1);
+    const limit = Math.max(Number(req.query.limit || 10), 1);
 
-    const total = await Upload.countDocuments({ uploader: req.user._id });
+    const query = { uploader: req.user._id };
+    if (req.query.exam) query.exam = req.query.exam;
 
-    const items = await Upload.find({ uploader: req.user._id })
+    const total = await Upload.countDocuments(query);
+
+    const items = await Upload.find(query)
       .populate("exam")
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit);
 
+    res.json({ items, page, total, limit });
+  } catch (err) {
+    console.error("UPLOAD ERROR:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+/* ASSIGNED EXAMS */
+router.get("/exams", async (req, res) => {
+  try {
+    const exams = await Exam.find({
+      assignedTeachers: req.user._id
+    }).sort({ createdAt: -1 });
+
+    res.json(exams);
+  } catch (err) {
+    console.error("TEACHER EXAMS ERROR:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+/* DASHBOARD */
+router.get("/dashboard", async (req, res) => {
+  try {
+    const examsCount = await Exam.countDocuments({
+      assignedTeachers: req.user._id
+    });
+
+    const uploadsCount = await Upload.countDocuments({
+      uploader: req.user._id
+    });
+
     res.json({
-      items,
-      page,
-      total,
-      limit
+      examsCount,
+      uploadsCount,
+      teacher: {
+        id: req.user._id,
+        name: req.user.name,
+        email: req.user.email
+      }
     });
 
   } catch (err) {
+    console.error("TEACHER DASHBOARD ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 });

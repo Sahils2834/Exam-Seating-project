@@ -1,32 +1,64 @@
-
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import api from "../../api";
+import "../../styles/auth.css";
 
 export default function StudentLogin() {
   const navigate = useNavigate();
-  const [studentId, setStudentId] = useState("");
+
+  const [identifier, setIdentifier] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const submit = async (e) => {
-    e?.preventDefault();
+    e.preventDefault();
+    setError("");
+
+    if (!identifier) {
+      setError("Enter Roll Number or Email");
+      return;
+    }
+
     try {
-      const res = await api.post("/auth/student-login", { studentId });
+      setLoading(true);
+
+      const res = await api.post("/auth/student-login", {
+        identifier
+      });
+
+      // Save session
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.user));
+
       navigate("/student");
+
     } catch (err) {
-      alert(err.response?.data?.message || "Invalid studentId");
+      setError(err.response?.data?.message || "Invalid Student ID or Email");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="auth-page">
-      <form className="auth-card" onSubmit={submit}>
-        <h2 className="auth-title">Student Login (ID)</h2>
-        <input className="auth-input" placeholder="Student ID or Email" value={studentId} onChange={e=>setStudentId(e.target.value)} />
-        <button className="btn-primary auth-btn" type="submit">Login</button>
+    <div className="auth-container">
+      <form className="glass-card auth-card" onSubmit={submit}>
+        <h2 className="auth-title">Student Login</h2>
+
+        {error && <p className="auth-error">{error}</p>}
+
+        <input
+          className="auth-input"
+          placeholder="Roll Number or Email"
+          value={identifier}
+          onChange={(e) => setIdentifier(e.target.value)}
+        />
+
+        <button className="btn-purple auth-btn" type="submit" disabled={loading}>
+          {loading ? "Logging in..." : "Login"}
+        </button>
+
         <div className="auth-links">
-          <a onClick={()=>navigate("/login")}>Back to account login</a>
+          <Link to="/login">Back to Account Login</Link>
         </div>
       </form>
     </div>

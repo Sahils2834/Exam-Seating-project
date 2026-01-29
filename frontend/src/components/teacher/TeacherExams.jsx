@@ -1,69 +1,158 @@
 import React, { useEffect, useState } from "react";
-import API from "../../api";
-import Papa from 'papaparse';
+import api from "../../api";
+import Papa from "papaparse";
 
-export default function TeacherExams(){
+export default function TeacherExams() {
   const [exams, setExams] = useState([]);
-  useEffect(()=>{ API.get('/exams').then(r=>setExams(r.data)).catch(()=>setExams([])); }, []);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadExams();
+  }, []);
+
+  const loadExams = async () => {
+    try {
+      const res = await api.get("/exams/teacher/exams");
+      setExams(res.data || []);
+    } catch {
+      setExams([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) return <p className="p-6">Loading assigned exams...</p>;
 
   return (
-    <div className="container p-6">
-      <h1 className="text-xl font-bold mb-4">Exams</h1>
+    <div className="container p-6 space-y-4">
+      <h1 className="text-xl font-bold">Assigned Exams</h1>
+
       <div className="grid md:grid-cols-3 gap-4">
-        {exams.map(e => <ExamCard key={e._id} exam={e} />)}
+        {exams.length === 0 && <p>No exams assigned yet</p>}
+        {exams.map((e) => (
+          <ExamCard key={e._id} exam={e} />
+        ))}
       </div>
     </div>
   );
 }
 
-function ExamCard({ exam }){
-  const [files, setFiles] = useState([]);
+function ExamCard({ exam }) {
+  const [uploads, setUploads] = useState([]);
   const [preview, setPreview] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
 
-  useEffect(()=>{ API.get(`/exams/${exam._id}/files`).then(r=>setFiles(r.data.files)).catch(()=>setFiles([])); }, [exam._id]);
+  useEffect(() => {
+    loadUploads();
+  }, [exam._id]);
+
+  const loadUploads = async () => {
+    try {
+      const res = await api.get(`/exams/${exam._id}/files`);
+      setUploads(res.data.files || []);
+    } catch {
+      setUploads([]);
+    }
+  };
 
   const onUpload = async (ev) => {
     const file = ev.target.files[0];
     if (!file) return;
-    // preview CSV if csv
-    if (file.name.toLowerCase().endsWith('.csv')) {
-      Papa.parse(file, { header:true, complete: (res)=> setPreview(res.data.slice(0,50)), error:(err)=>alert('CSV error: '+err.message) });
+
+    if (file.name.endsWith(".csv")) {
+      Papa.parse(file, {
+        header: true,
+        complete: (res) => setPreview(res.data.slice(0, 50))
+      });
     } else {
       setPreview(null);
     }
-    // store selected for actual upload
+
     setSelectedFile(file);
   };
 
-  const confirmUpload = async () => {
-    if (!selectedFile) return alert('Select file first');
-    const form = new FormData(); form.append('file', selectedFile);
-    await API.post(`/exams/${exam._id}/upload`, form, { headers: {'Content-Type':'multipart/form-data'} });
-    const r = await API.get(`/exams/${exam._id}/files`); setFiles(r.data.files);
-    setSelectedFile(null); setPreview(null);
-    alert('Uploaded');
+  const upload = async (endpoint) => {
+    if (!selectedFile) return alert("Select file first");
+
+    try {
+      setUploading(true);
+      const form = new FormData();
+      form.append("file", selectedFile);
+
+      await api.post(`/exams/${exam._id}/${endpoint}`, form);
+
+      await loadUploads();
+      setSelectedFile(null);
+      setPreview(null);
+
+      alert("Upload successful");
+    } catch {
+      alert("Upload failed");
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
-    <div className="card">
-      <h3 className="font-semibold">{exam.title}</h3>
-      <p className="small">{exam.venue}</p>
-      <p className="small">{exam.date ? new Date(exam.date).toLocaleString() : 'No date'}</p>
+    <div className="card p-5 space-y-3 hover:shadow-md transition">
 
-      <div style={{marginTop:12}}>
-        <input type="file" onChange={onUpload} />
-        {selectedFile && <div style={{marginTop:8}}><button className="btn btn-primary" onClick={confirmUpload}>Confirm Upload</button></div>}
-        {preview && <div style={{marginTop:8, overflowX:'auto'}}>
-          <h4 className="font-semibold">CSV Preview (first 50 rows)</h4>
-          <table style={{width:'100%',borderCollapse:'collapse'}}>
-            <thead><tr>{Object.keys(preview[0]||{}).map(h=> <th key={h} style={{textAlign:'left',padding:6,borderBottom:'1px solid #eee'}}>{h}</th>)}</tr></thead>
-            <tbody>{preview.map((r,idx)=> <tr key={idx}>{Object.values(r).map((v,i)=> <td key={i} style={{padding:6,borderBottom:'1px solid #f6f6f6'}}>{v}</td>)}</tr>)}</tbody>
-          </table>
-        </div>}
-        <div className="files-list mt-2">
-          {files.map(f => <div key={f.name} className="file-item"><a href={`${(process.env.REACT_APP_API||'http://localhost:5000').replace('/api','')}/uploads/${exam._id}/${f.name}`} target="_blank" rel="noreferrer">{f.name}</a><span className="small">{Math.round(f.size/1024)} KB</span></div>)}
+      <div>
+        <h3 className="font-semibold text-lg">{exam.title}</h3>
+        <p className="small">{exam.subject || "No subject"}</p>
+        <p className="small text-gray-500">
+          {new Date(exam.date).toLocaleString()}
+        </p>
+      </div>
+
+      <input type="file" onChange={onUpload} />
+
+      {selectedFile && (
+        <div className="flex gap-2">
+          <button className="btn btn-primary" disabled={uploading} onClick={() => upload("upload")}>
+            Upload File
+          </button>
+
+          {selectedFile.name.endsWith(".csv") && (
+            <button className="btn btn-secondary" disabled={uploading} onClick={() => upload("upload-seating")}>
+              Upload Seating CSV
+            </button>
+          )}
         </div>
+      )}
+
+      {preview && (
+        <div className="overflow-x-auto text-xs">
+          <table className="w-full border">
+            <thead>
+              <tr>
+                {Object.keys(preview[0]).map(h => (
+                  <th key={h} className="border p-1">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {preview.map((r, i) => (
+                <tr key={i}>
+                  {Object.values(r).map((v, j) => (
+                    <td key={j} className="border p-1">{v}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      <div className="text-sm space-y-1">
+        {uploads.map(f => (
+          <div key={f._id} className="flex justify-between">
+            <a href={`http://localhost:5000${f.path}`} target="_blank" rel="noreferrer">
+              {f.originalName}
+            </a>
+            <span>{Math.round(f.size / 1024)} KB</span>
+          </div>
+        ))}
       </div>
     </div>
   );

@@ -1,19 +1,40 @@
-
 import React, { useEffect, useState } from "react";
 import api from "../../api";
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid
+} from "recharts";
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState({ admin:0, teacher:0, student:0, pending:0 });
+  const [stats, setStats] = useState({
+    admin: 0,
+    teacher: 0,
+    student: 0,
+    pending: 0
+  });
 
-  useEffect(()=>{ load(); }, []);
+  useEffect(() => {
+    load();
+  }, []);
 
   const load = async () => {
     try {
-      const res = await api.get("/admin/stats");
-      setStats(res.data);
+      const statsRes = await api.get("/admin/stats");
+      const pendingRes = await api.get("/admin/requests");
+
+      setStats({
+        admin: statsRes.data.admin || 0,
+        teacher: statsRes.data.teacher || 0,
+        student: statsRes.data.student || 0,
+        pending: pendingRes.data?.length || 0
+      });
     } catch (err) {
-      console.error(err);
+      console.error("ADMIN DASHBOARD ERROR:", err);
     }
   };
 
@@ -24,33 +45,47 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div className="page-container">
-      <h1 className="page-title">Admin Dashboard</h1>
+    <div className="container p-6 space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+        <p className="text-gray-500 text-sm">
+          System overview & statistics
+        </p>
+      </div>
 
-      <div className="card-grid">
-        <div className="card">
-          <div className="stat-title">Total Admins</div>
+      {/* ===== STAT CARDS ===== */}
+      <div className="grid md:grid-cols-4 gap-4">
+
+        <div className="card stat-card">
+          <div className="stat-title">Admins</div>
           <div className="stat-number">{stats.admin}</div>
         </div>
 
-        <div className="card">
-          <div className="stat-title">Total Teachers</div>
+        <div className="card stat-card">
+          <div className="stat-title">Teachers</div>
           <div className="stat-number">{stats.teacher}</div>
         </div>
 
-        <div className="card">
-          <div className="stat-title">Total Students</div>
+        <div className="card stat-card">
+          <div className="stat-title">Students</div>
           <div className="stat-number">{stats.student}</div>
         </div>
 
-        <div className="card">
+        <div className="card stat-card">
           <div className="stat-title">Pending Requests</div>
-          <div className="stat-number">{stats.pending}</div>
+          <div className="stat-number text-orange-600">
+            {stats.pending}
+          </div>
         </div>
+
       </div>
 
-      <div className="card chart-card">
-        <h3>User Role Distribution</h3>
+      {/* ===== CHART ===== */}
+      <div className="card p-5">
+        <h3 className="mb-3 font-semibold text-lg">
+          User Role Distribution
+        </h3>
+
         <div style={{ width: "100%", height: 300 }}>
           <ResponsiveContainer>
             <BarChart data={data}>
@@ -58,7 +93,7 @@ export default function AdminDashboard() {
               <XAxis dataKey="name" />
               <YAxis allowDecimals={false} />
               <Tooltip />
-              <Bar dataKey="value" fill="#7C5CFF" radius={[8,8,0,0]} />
+              <Bar dataKey="value" radius={[10, 10, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

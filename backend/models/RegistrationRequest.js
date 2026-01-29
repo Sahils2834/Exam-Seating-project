@@ -4,13 +4,17 @@ const registrationRequestSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
 
-    email: { type: String },
+    email: { type: String, lowercase: true, trim: true, default: "" },
 
-    rollNumber: { type: String },
+    rollNumber: { type: String, trim: true, default: "" },
 
-    designation: { type: String },
+    designation: { type: String, default: "" },
 
-    role: { type: String, enum: ["student", "teacher"], required: true },
+    role: {
+      type: String,
+      enum: ["student", "teacher"],
+      required: true
+    },
 
     passwordHash: { type: String, required: true },
 

@@ -6,24 +6,41 @@ import "../../styles/auth.css";
 
 export default function Login() {
   const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const submit = async (e) => {
     e.preventDefault();
+    setError("");
+
+    if (!email || !password) {
+      setError("Email and password are required");
+      return;
+    }
 
     try {
+      setLoading(true);
+
       const res = await api.post("/auth/login", { email, password });
 
+      // Save session
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.user));
 
-      if (res.data.user.role === "admin") navigate("/admin");
-      else if (res.data.user.role === "teacher") navigate("/teacher");
+      const role = res.data.user.role;
+
+      // Role-based redirect
+      if (role === "admin") navigate("/admin");
+      else if (role === "teacher") navigate("/teacher");
       else navigate("/student");
 
     } catch (err) {
-      alert(err.response?.data?.message || "Login failed");
+      setError(err.response?.data?.message || "Login failed. Try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -31,6 +48,8 @@ export default function Login() {
     <div className="auth-container">
       <form className="glass-card auth-card" onSubmit={submit}>
         <h2 className="auth-title">Account Login</h2>
+
+        {error && <p className="auth-error">{error}</p>}
 
         <input
           type="email"
@@ -48,8 +67,8 @@ export default function Login() {
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        <button type="submit" className="btn-purple auth-btn">
-          Login
+        <button type="submit" className="btn-purple auth-btn" disabled={loading}>
+          {loading ? "Logging in..." : "Login"}
         </button>
 
         <div className="auth-links">
