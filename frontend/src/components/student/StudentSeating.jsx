@@ -6,28 +6,45 @@ export default function StudentSeating() {
   const { examId } = useParams();
   const user = JSON.parse(localStorage.getItem("user"));
   const [plan, setPlan] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.get(`/api/seatingplan/${examId}`).then(res => {
-      setPlan(res.data);
-    });
+    axios.get(`/api/exams/${examId}/plans`)
+      .then(res => {
+        if (res.data && res.data.length > 0) {
+          setPlan(res.data[0]);
+        }
+      })
+      .catch(() => setPlan(null))
+      .finally(() => setLoading(false));
   }, [examId]);
 
-  if (!plan) return <div className="page">No seating assigned yet.</div>;
+  if (loading) return <div className="page">Loading seating...</div>;
 
-  const mySeat = plan.allocations.find(a => a.rollNumber === user.rollNumber);
+  if (!plan || !plan.allocations?.length)
+    return <div className="page">No seating assigned yet.</div>;
+
+  const mySeat = plan.allocations.find(
+    a => a.rollNumber === user.rollNumber
+  );
 
   return (
     <div className="page">
       <h2 className="page-title">Seating Plan</h2>
 
-      <div 
+      {mySeat && (
+        <div className="card" style={{ marginBottom: 16 }}>
+          <strong>Your Seat:</strong> {mySeat.seatNumber}
+        </div>
+      )}
+
+      <div
         className="seat-grid"
-        style={{ gridTemplateColumns: `repeat(10, 80px)` }}
+        style={{ gridTemplateColumns: `repeat(8, 80px)` }}
       >
         {plan.allocations.map((seat, i) => (
-          <div 
-            key={i} 
+          <div
+            key={i}
             className={`seat-box ${
               seat.rollNumber === user.rollNumber ? "my-seat" : "occupied"
             }`}

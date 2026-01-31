@@ -19,7 +19,7 @@ export default function Navbar({ onToggle }) {
   const logout = () => {
     localStorage.clear();
     navigate("/login");
-    window.location.reload();
+    window.location.reload(); // ensure UI resets cleanly
   };
 
   const goDashboard = () => {
@@ -33,11 +33,18 @@ export default function Navbar({ onToggle }) {
   return (
     <header className="nav-bar">
       <div className="nav-left">
-        <button className="hamburger" onClick={onToggle}>☰</button>
+        <button
+          className="hamburger"
+          onClick={onToggle}
+          aria-label="toggle sidebar"
+        >
+          ☰
+        </button>
         <div className="brand">Exam Seating</div>
       </div>
 
       <div className="nav-right">
+        {/* DARK MODE TOGGLE */}
         <label className="switch">
           <input
             type="checkbox"
@@ -47,6 +54,7 @@ export default function Navbar({ onToggle }) {
           <span className="slider" />
         </label>
 
+        {/* USER INFO */}
         {user ? (
           <div className="nav-user">
             <span className="nav-username">

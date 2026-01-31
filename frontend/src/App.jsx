@@ -48,14 +48,15 @@ function Layout({ children }) {
       {hideLayout && <AuthHeader />}
 
       {!hideLayout && (
-        <div className="app-layout">
-          <Sidebar collapsed={collapsed} />
-
-          <div className="content-container">
-            <Navbar onToggle={() => setCollapsed(prev => !prev)} />
-            {children}
+        <>
+          <Navbar onToggle={() => setCollapsed(prev => !prev)} />
+          <div className="app-layout">
+            <Sidebar collapsed={collapsed} />
+            <div className="content-container">
+              {children}
+            </div>
           </div>
-        </div>
+        </>
       )}
 
       {hideLayout && <main className="auth-wrap">{children}</main>}
@@ -81,35 +82,34 @@ function HomeRedirect() {
 export default function App() {
   return (
     <BrowserRouter>
-  <Layout>
-    <Routes>
+      <Layout>
+        <Routes>
 
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/student-login" element={<StudentLogin />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/student-login" element={<StudentLogin />} />
 
-      <Route path="/admin" element={<ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>} />
-      <Route path="/admin/exams" element={<ProtectedRoute role="admin"><AdminExams /></ProtectedRoute>} />
-      <Route path="/admin/allowed" element={<ProtectedRoute role="admin"><AllowedUsers /></ProtectedRoute>} />
-      <Route path="/admin/requests" element={<ProtectedRoute role="admin"><Requests /></ProtectedRoute>} />
-      <Route path="/admin/settings" element={<ProtectedRoute role="admin"><AdminSettings /></ProtectedRoute>} />
+          <Route path="/admin" element={<ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>} />
+          <Route path="/admin/exams" element={<ProtectedRoute role="admin"><AdminExams /></ProtectedRoute>} />
+          <Route path="/admin/allowed" element={<ProtectedRoute role="admin"><AllowedUsers /></ProtectedRoute>} />
+          <Route path="/admin/requests" element={<ProtectedRoute role="admin"><Requests /></ProtectedRoute>} />
+          <Route path="/admin/settings" element={<ProtectedRoute role="admin"><AdminSettings /></ProtectedRoute>} />
 
-      <Route path="/teacher" element={<ProtectedRoute role="teacher"><TeacherDashboard /></ProtectedRoute>} />
-      <Route path="/teacher/exams" element={<ProtectedRoute role="teacher"><TeacherExams /></ProtectedRoute>} />
-      <Route path="/teacher/uploads" element={<ProtectedRoute role="teacher"><TeacherUploads /></ProtectedRoute>} />
-      <Route path="/teacher/profile" element={<ProtectedRoute role="teacher"><TeacherProfile /></ProtectedRoute>} />
+          <Route path="/teacher" element={<ProtectedRoute role="teacher"><TeacherDashboard /></ProtectedRoute>} />
+          <Route path="/teacher/exams" element={<ProtectedRoute role="teacher"><TeacherExams /></ProtectedRoute>} />
+          <Route path="/teacher/uploads" element={<ProtectedRoute role="teacher"><TeacherUploads /></ProtectedRoute>} />
+          <Route path="/teacher/profile" element={<ProtectedRoute role="teacher"><TeacherProfile /></ProtectedRoute>} />
 
-      <Route path="/student" element={<ProtectedRoute role="student"><StudentDashboard /></ProtectedRoute>} />
-      <Route path="/student/exams" element={<ProtectedRoute role="student"><StudentExams /></ProtectedRoute>} />
-      <Route path="/student/profile" element={<ProtectedRoute role="student"><StudentProfile /></ProtectedRoute>} />
-      <Route path="/student/seating" element={<ProtectedRoute role="student"><StudentSeating /></ProtectedRoute>} />
+          <Route path="/student" element={<ProtectedRoute role="student"><StudentDashboard /></ProtectedRoute>} />
+          <Route path="/student/exams" element={<ProtectedRoute role="student"><StudentExams /></ProtectedRoute>} />
+          <Route path="/student/profile" element={<ProtectedRoute role="student"><StudentProfile /></ProtectedRoute>} />
+          <Route path="/student/seating" element={<ProtectedRoute role="student"><StudentSeating /></ProtectedRoute>} />
 
-      <Route path="/" element={<HomeRedirect />} />
-      <Route path="*" element={<Navigate to="/" />} />
+          <Route path="/" element={<HomeRedirect />} />
+          <Route path="*" element={<Navigate to="/" />} />
 
-    </Routes>
-  </Layout>
-</BrowserRouter>
-
+        </Routes>
+      </Layout>
+    </BrowserRouter>
   );
 }

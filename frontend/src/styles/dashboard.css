@@ -1,14 +1,25 @@
-.chart-card { padding:18px; border-radius:12px; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.04)); }
-.btn-primary { background:var(--accent); color:white; border:none; padding:10px 14px; border-radius:8px; cursor:pointer; }
-.btn-ghost { background:transparent; border:1px solid rgba(0,0,0,0.06); padding:8px 12px; border-radius:8px; cursor:pointer; }
 .page {
   padding: 20px;
 }
 
 .page-title {
   font-size: 26px;
-  font-weight: 700;
-  margin-bottom: 15px;
+  font-weight: 800;
+  margin-bottom: 16px;
+}
+
+.chart-card {
+  padding: 18px;
+  border-radius: 14px;
+  background: white;
+  box-shadow: var(--shadow-lg);
+}
+
+.table-card {
+  background: white;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: var(--shadow-lg);
 }
 
 .search-row {
@@ -19,17 +30,9 @@
 
 .search-row input {
   padding: 10px;
-  flex: 1;
   border-radius: 10px;
   border: 1px solid #ccc;
-}
-
-.table-card {
-  background: var(--card-bg);
-  backdrop-filter: blur(12px);
-  border-radius: 16px;
-  padding: 20px;
-  box-shadow: var(--shadow-lg);
+  flex: 1;
 }
 
 table {
@@ -46,69 +49,12 @@ th, td {
   font-weight: 600;
   color: var(--purple);
 }
+
+/* Clickable Cards */
 .card.clickable {
   cursor: pointer;
-  transition: 0.15s ease;
 }
 
 .card.clickable:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-}
-body {
-  margin: 0;
-}
-
-.app-layout {
-  display: flex;
-  min-height: 100vh;
-  width: 100%;
-}
-
-.sidebar {
-  width: 240px;
-  background: #fff;
-  border-right: 1px solid #eee;
-  padding: 16px 12px;
-  transition: width 0.25s ease;
-}
-
-.sidebar.collapsed {
-  width: 80px;
-}
-
-.sidebar-brand {
-  font-size: 22px;
-  font-weight: bold;
-  margin-bottom: 18px;
-}
-
-.sidebar-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.sidebar-link {
-  padding: 10px 12px;
-  border-radius: 10px;
-  text-decoration: none;
-  color: #444;
-  font-weight: 500;
-  transition: 0.2s;
-}
-
-.sidebar-link:hover {
-  background: #f4f4ff;
-}
-
-.sidebar-link.active {
-  background: #eef2ff;
-  color: #4f46e5;
-}
-
-.content-container {
-  flex: 1;
-  background: linear-gradient(#f7f7ff, #f3f0ff);
-  padding: 18px;
 }
