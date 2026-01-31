@@ -1,58 +1,84 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { useParams } from "react-router-dom";
+import api from "../../api";
+import { useParams, useNavigate } from "react-router-dom";
 
 export default function StudentSeating() {
   const { examId } = useParams();
-  const user = JSON.parse(localStorage.getItem("user"));
-  const [plan, setPlan] = useState(null);
+  const navigate = useNavigate();
+
+  const [rows, setRows] = useState([]);
+  const [filename, setFilename] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.get(`/api/exams/${examId}/plans`)
-      .then(res => {
-        if (res.data && res.data.length > 0) {
-          setPlan(res.data[0]);
-        }
+    if (!examId) {
+      console.error("❌ examId missing in URL");
+      setLoading(false);
+      return;
+    }
+
+    api
+      .get(`/exams/${examId}/uploads`)
+      .then((res) => {
+        setRows(res.data.rows || []);
+        setFilename(res.data.filename || "");
       })
-      .catch(() => setPlan(null))
+      .catch((err) => {
+        console.error("SEATING LOAD ERROR:", err);
+        setRows([]);
+      })
       .finally(() => setLoading(false));
   }, [examId]);
 
-  if (loading) return <div className="page">Loading seating...</div>;
+  if (!examId) {
+    return (
+      <div className="page">
+        <p>Invalid exam selection.</p>
+        <button className="btn-primary" onClick={() => navigate("/student/exams")}>
+          Go back to exams
+        </button>
+      </div>
+    );
+  }
 
-  if (!plan || !plan.allocations?.length)
-    return <div className="page">No seating assigned yet.</div>;
+  if (loading) {
+    return <div className="page">Loading seating arrangement…</div>;
+  }
 
-  const mySeat = plan.allocations.find(
-    a => a.rollNumber === user.rollNumber
-  );
+  if (!rows.length) {
+    return <div className="page">No seating uploaded yet.</div>;
+  }
+
+  const headers = Object.keys(rows[0]);
 
   return (
     <div className="page">
-      <h2 className="page-title">Seating Plan</h2>
+      <h2 className="page-title">Seating Arrangement</h2>
 
-      {mySeat && (
-        <div className="card" style={{ marginBottom: 16 }}>
-          <strong>Your Seat:</strong> {mySeat.seatNumber}
-        </div>
-      )}
+      <div className="card" style={{ marginBottom: 16 }}>
+        <strong>Source File:</strong> {filename}
+      </div>
 
-      <div
-        className="seat-grid"
-        style={{ gridTemplateColumns: `repeat(8, 80px)` }}
-      >
-        {plan.allocations.map((seat, i) => (
-          <div
-            key={i}
-            className={`seat-box ${
-              seat.rollNumber === user.rollNumber ? "my-seat" : "occupied"
-            }`}
-          >
-            <div className="seat-number">{seat.seatNumber}</div>
-            <div className="seat-roll">{seat.rollNumber}</div>
-          </div>
-        ))}
+      <div className="card" style={{ overflowX: "auto" }}>
+        <table>
+          <thead>
+            <tr>
+              {headers.map((h) => (
+                <th key={h}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+
+          <tbody>
+            {rows.map((row, i) => (
+              <tr key={i}>
+                {headers.map((h) => (
+                  <td key={h}>{row[h]}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
