@@ -99,7 +99,6 @@ app.use("/api/exams", examRoutes);
 app.use("/api/student", studentRoutes);
 app.use("/api/teachers", teacherRoutes);
 
-app.use("/api/seating", require("./routes/seatingRoutes"));
 
 /**
  * =========================

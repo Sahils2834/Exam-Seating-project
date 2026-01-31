@@ -107,35 +107,25 @@ exports.approveRequest = async (req, res) => {
   try {
     const r = await RegistrationRequest.findById(req.params.id);
 
-    if (!r) {
+    if (!r)
       return res.status(404).json({ message: "Request not found" });
-    }
 
-    if (r.status === "approved") {
-      return res.status(400).json({ message: "Request already approved" });
-    }
+    if (r.status === "approved")
+      return res.status(400).json({ message: "Already approved" });
 
-    // Normalize email
-    let email = (r.email || "").trim().toLowerCase();
-
-    // Students fallback email
+    let email = (r.email || "").toLowerCase();
     if (r.role === "student" && !email) {
       email = `${r.rollNumber}@students.local`;
     }
 
-    // Prevent duplicate accounts
     const existingUser = await User.findOne({
-      $or: [
-        { email },
-        { rollNumber: r.rollNumber }
-      ]
+      $or: [{ email }, { rollNumber: r.rollNumber }]
     });
 
-    if (existingUser) {
+    if (existingUser)
       return res.status(400).json({ message: "User already exists" });
-    }
 
-    // Create new user
+    // ✅ Create actual user
     const user = await User.create({
       name: r.name,
       email,
@@ -145,35 +135,23 @@ exports.approveRequest = async (req, res) => {
       designation: r.role === "teacher" ? r.designation : undefined
     });
 
-    // Create student profile if student
-    if (r.role === "student") {
-      await StudentProfile.create({
-        user: user._id,
-        rollNumber: r.rollNumber
-      });
-    }
+    // ✅ ADD TO ALLOWED USERS
+    await AllowedUser.create({
+      identifier: r.role === "student" ? r.rollNumber : email,
+      role: r.role,
+      name: r.name,
+      designation: r.designation || "",
+      createdBy: req.user._id
+    });
 
-    // Mark request approved
     r.status = "approved";
     await r.save();
 
-    // Attempt email notification (non-blocking)
-    try {
-      await sendMail({
-        to: email,
-        subject: "Account Approved",
-        text: `Hello ${r.name}, your account has been approved successfully.`
-      });
-    } catch {
-      console.warn("⚠️ Email failed but approval completed");
-    }
-
     res.json({
-      message: "User approved successfully",
+      message: "User approved & activated successfully",
       user: {
         id: user._id,
         name: user.name,
-        email: user.email,
         role: user.role
       }
     });
@@ -183,7 +161,6 @@ exports.approveRequest = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
 
 /**
  * ============================

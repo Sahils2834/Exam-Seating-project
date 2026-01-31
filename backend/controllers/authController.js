@@ -16,7 +16,7 @@ exports.login = async (req, res) => {
     if (!email || !password)
       return res.status(400).json({ message: "Email and password required" });
 
-    const user = await User.findOne({ email }).select("+password");
+    const user = await User.findOne({ email: email.toLowerCase() }).select("+password");
 
     if (!user)
       return res.status(400).json({ message: "Invalid email or password" });
@@ -66,24 +66,20 @@ exports.studentLogin = async (req, res) => {
 
     const search = identifier.trim().toLowerCase();
 
-    // Try existing student
     let user = await User.findOne({
       role: "student",
       $or: [{ rollNumber: search }, { email: search }]
     });
 
-    // If not found → check allowed list
     if (!user) {
       const allowed = await AllowedUser.findOne({
         identifier: search,
         role: "student"
       });
 
-      if (!allowed) {
+      if (!allowed)
         return res.status(403).json({ message: "Student not allowed" });
-      }
 
-      // Auto-create student account
       user = await User.create({
         name: allowed.name || "Student",
         email: search.includes("@") ? search : `${search}@students.local`,
@@ -91,11 +87,8 @@ exports.studentLogin = async (req, res) => {
         rollNumber: search,
         password: await bcrypt.hash("student-temp", 10)
       });
-
-      console.log("✅ AUTO-CREATED STUDENT:", search);
     }
 
-    // Create token
     const token = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
@@ -123,7 +116,7 @@ exports.studentLogin = async (req, res) => {
 
 /**
  * ==============================
- * REGISTRATION REQUEST
+ * REGISTRATION REQUEST (FIXED)
  * ==============================
  */
 exports.registerRequest = async (req, res) => {
@@ -139,37 +132,57 @@ exports.registerRequest = async (req, res) => {
     if (role === "teacher" && !email)
       return res.status(400).json({ message: "Email required" });
 
-    // Allowed user check
-    const allowed = await AllowedUser.findOne({
-      identifier: role === "student" ? rollNumber : email,
-      role
-    });
+    // ✅ Only STUDENTS must exist in AllowedUser
+    if (role === "student") {
+      const allowed = await AllowedUser.findOne({
+        identifier: rollNumber,
+        role: "student"
+      });
 
-    if (!allowed)
-      return res.status(403).json({ message: "Not in allowed list" });
+      if (!allowed)
+        return res.status(403).json({ message: "Student not allowed" });
+    }
 
-    // Prevent duplicate request
-    const existingReq = await RegistrationRequest.findOne({
-      $or: [{ email }, { rollNumber }],
-      status: "pending"
-    });
+    /**
+     * 🔐 SAFE QUERY BUILDING (NO undefined!)
+     */
+    const reqQuery = [];
+    const userQuery = [];
 
-    if (existingReq)
-      return res.status(400).json({ message: "Request already exists" });
+    if (email) {
+      reqQuery.push({ email: email.toLowerCase() });
+      userQuery.push({ email: email.toLowerCase() });
+    }
 
-    // Prevent duplicate user
-    const existingUser = await User.findOne({
-      $or: [{ email }, { rollNumber }]
-    });
+    if (rollNumber) {
+      reqQuery.push({ rollNumber });
+      userQuery.push({ rollNumber });
+    }
 
-    if (existingUser)
-      return res.status(400).json({ message: "User already exists" });
+    // Check pending requests
+    if (reqQuery.length) {
+      const existingReq = await RegistrationRequest.findOne({
+        $or: reqQuery,
+        status: "pending"
+      });
+
+      if (existingReq)
+        return res.status(400).json({ message: "Request already exists" });
+    }
+
+    // Check existing users
+    if (userQuery.length) {
+      const existingUser = await User.findOne({ $or: userQuery });
+
+      if (existingUser)
+        return res.status(400).json({ message: "User already exists" });
+    }
 
     const passwordHash = await bcrypt.hash(password, 10);
 
     await RegistrationRequest.create({
       name,
-      email,
+      email: email?.toLowerCase(),
       rollNumber,
       role,
       designation,
@@ -178,7 +191,7 @@ exports.registerRequest = async (req, res) => {
     });
 
     res.json({
-      message: "Registration submitted. Await admin approval."
+      message: "Registration request submitted. Await admin approval."
     });
 
   } catch (err) {

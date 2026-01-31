@@ -337,3 +337,57 @@ exports.exportCSV = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+/* ============================
+   GET SEATING CSV FROM UPLOADS
+   (USED BY STUDENT VIEW)
+============================ */
+exports.getExamUploads = async (req, res) => {
+  try {
+    const { examId } = req.params;
+
+    // Get latest CSV upload for exam
+    const upload = await Upload.findOne({
+      exam: examId,
+      mimeType: "text/csv"
+    }).sort({ createdAt: -1 });
+
+    if (!upload) {
+      return res.json({
+        filename: "",
+        rows: []
+      });
+    }
+
+    const filePath = path.join(__dirname, "..", upload.path);
+
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({
+        message: "CSV file not found on server"
+      });
+    }
+
+    const csvData = fs.readFileSync(filePath, "utf8");
+
+    const parsed = Papa.parse(csvData, {
+      header: true,
+      skipEmptyLines: true
+    });
+
+    if (parsed.errors.length) {
+      return res.status(400).json({
+        message: "CSV parsing failed",
+        errors: parsed.errors
+      });
+    }
+
+    res.json({
+      filename: upload.originalName,
+      rows: parsed.data
+    });
+
+  } catch (err) {
+    console.error("GET CSV UPLOAD ERROR:", err);
+    res.status(500).json({ message: err.message });
+  }
+};

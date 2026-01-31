@@ -121,6 +121,16 @@ router.get(
   examCtrl.getExam
 );
 
+/* ======================================================
+   STUDENT → VIEW SEATING FROM CSV UPLOAD
+====================================================== */
+
+router.get(
+  "/:examId/uploads",
+  authMiddleware,
+  examCtrl.getExamUploads
+);
+
 
 /* ======================================================
    SEATING LOOKUP (ALL AUTH USERS)
