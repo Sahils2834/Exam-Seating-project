@@ -208,44 +208,35 @@ exports.importCSV = async (req, res) => {
 ============================ */
 exports.uploadCSVSeating = async (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ message: "CSV file required" });
-    }
+    if (!req.file) return res.status(400).json({ message: "CSV required" });
 
     const examId = req.params.id;
     const csv = req.file.buffer.toString();
     const parsed = Papa.parse(csv, { header: true });
 
     if (parsed.errors.length) {
-      return res.status(400).json({ message: "Invalid CSV format" });
+      return res.status(400).json({ message: "CSV format invalid" });
     }
 
-    const rows = parsed.data.filter(r => r.rollNumber || r.roll || r.seat);
+    const rows = parsed.data.filter(r => r.rollNumber || r.roll);
 
     let allocations = [];
-    let index = 0;
 
-    for (const row of rows) {
-      const roll = row.rollNumber || row.roll || row.RollNumber;
-      const seat = row.seat || row.seatNumber || `S-${index + 1}`;
-
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+      const roll = row.rollNumber || row.roll;
       if (!roll) continue;
 
       const student = await User.findOne({ rollNumber: roll });
       if (!student) continue;
 
-      let r = Number(row.row) || Math.floor(index / 6) + 1;
-      let c = Number(row.col) || (index % 6) + 1;
-
       allocations.push({
         student: student._id,
         rollNumber: roll,
-        seatNumber: seat,
-        row: r,
-        col: c
+        seatNumber: row.seat || `R${Math.floor(i / 8) + 1}-C${(i % 8) + 1}`,
+        row: Number(row.row) || Math.floor(i / 8) + 1,
+        col: Number(row.col) || (i % 8) + 1
       });
-
-      index++;
     }
 
     await SeatingPlan.deleteMany({ exam: examId });
@@ -254,26 +245,18 @@ exports.uploadCSVSeating = async (req, res) => {
 
     const plan = await SeatingPlan.create({
       exam: examId,
-      examName: exam?.title || "Exam",
-      hall: null,
+      examName: exam?.title,
       allocations,
       createdBy: req.user._id
     });
 
-    await Exam.findByIdAndUpdate(examId, { seatingUploaded: true });
-
-    res.json({
-      message: "Seating uploaded successfully",
-      count: allocations.length,
-      plan
-    });
+    res.json({ message: "Seating uploaded", count: allocations.length, plan });
 
   } catch (err) {
-    console.error("UPLOAD CSV ERROR:", err);
+    console.error(err);
     res.status(500).json({ error: err.message });
   }
 };
-
 
 
 /* ============================

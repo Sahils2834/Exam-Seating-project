@@ -1,70 +1,19 @@
 const mongoose = require("mongoose");
 
-/**
- * INDIVIDUAL SEAT ALLOCATION
- */
-const allocationSchema = new mongoose.Schema(
-  {
-    student: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true
-    },
+const AllocationSchema = new mongoose.Schema({
+  student: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  rollNumber: String,
+  seatNumber: String,
+  row: Number,
+  col: Number
+});
 
-    rollNumber: {
-      type: String,
-      default: ""
-    },
+const SeatingPlanSchema = new mongoose.Schema({
+  exam: { type: mongoose.Schema.Types.ObjectId, ref: "Exam" },
+  examName: String,
+  hall: { type: mongoose.Schema.Types.ObjectId, ref: "ExamHall" },
+  allocations: [AllocationSchema],
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" }
+}, { timestamps: true });
 
-    seatNumber: {
-      type: String,
-      required: true
-    },
-
-    row: {
-      type: Number,
-      default: 0
-    },
-
-    col: {
-      type: Number,
-      default: 0
-    }
-  },
-  { _id: false }
-);
-
-/**
- * SEATING PLAN PER EXAM
- */
-const seatingPlanSchema = new mongoose.Schema(
-  {
-    exam: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Exam",
-      required: true
-    },
-
-    examName: {
-      type: String,
-      required: true
-    },
-
-    hall: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "ExamHall",
-      required: true,
-      default: null
-    },
-
-    allocations: [allocationSchema],
-
-    createdBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User"
-    }
-  },
-  { timestamps: true }
-);
-
-module.exports = mongoose.model("SeatingPlan", seatingPlanSchema);
+module.exports = mongoose.model("SeatingPlan", SeatingPlanSchema);
