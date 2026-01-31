@@ -1,0 +1,311 @@
+📘 Exam Seating Arrangement System
+
+A Full-Stack Web Application
+
+
+
+
+📌 Project Overview
+
+The Exam Seating Arrangement System is a full-stack web application designed to digitally manage exams, users, seating plans, and seating visibility for students, teachers, and administrators.
+
+It eliminates manual seating allocation and allows:
+
+Admins to manage exams & permissions
+
+Teachers to upload seating CSV files
+
+Students to securely view their seating arrangement
+
+The project follows role-based access control, ensuring each user only sees what they are allowed to.
+
+
+
+
+
+🧱 Technology Stack
+🔹 Frontend
+
+React.js (UI & Routing)
+
+React Router DOM (Client-side routing)
+
+Axios (API communication)
+
+CSS (custom + utility styles)
+
+🔹 Backend
+
+Node.js
+
+Express.js
+
+MongoDB (Mongoose ORM)
+
+JWT Authentication
+
+Multer (File uploads)
+
+PapaParse (CSV parsing)
+
+🔹 Database
+
+MongoDB Atlas / Local MongoDB
+
+Collections for users, exams, uploads, seating plans, requests
+
+
+
+
+
+👥 User Roles & Permissions
+🧑‍💼 Admin
+
+Create exams
+
+Assign teachers
+
+Approve or reject user registration requests
+
+Manage allowed users
+
+View system statistics
+
+👨‍🏫 Teacher
+
+View assigned exams
+
+Upload seating arrangement CSV files
+
+Upload exam-related documents
+
+View upload history
+
+👩‍🎓 Student
+
+Login securely
+
+View assigned exams
+
+View seating arrangement (CSV displayed in tabular form)
+
+View profile
+
+
+
+
+
+
+📂 Project Folder Structure
+🔹 Backend (/backend)
+backend/
+│
+├── models/
+│   ├── User.js
+│   ├── Exam.js
+│   ├── Upload.js
+│   ├── SeatingPlan.js
+│   ├── ExamHall.js
+│   ├── AllowedUser.js
+│   └── RegistrationRequest.js
+│
+├── controllers/
+│   ├── authController.js
+│   ├── adminController.js
+│   └── examController.js
+│
+├── routes/
+│   ├── authRoutes.js
+│   ├── adminRoutes.js
+│   ├── examRoutes.js
+│   ├── studentRoutes.js
+│   └── teacherRoutes.js
+│
+├── middleware/
+│   └── authMiddleware.js
+│
+├── uploads/
+│   └── (uploaded CSV & files)
+│
+├── server.js
+├── .env
+└── package.json
+
+🔹 Frontend (/frontend)
+frontend/
+│
+├── src/
+│   ├── components/
+│   │   ├── admin/
+│   │   ├── teacher/
+│   │   ├── student/
+│   │   ├── auth/
+│   │   └── common/
+│   │
+│   ├── styles/
+│   │   ├── global.css
+│   │   ├── dashboard.css
+│   │   ├── student.css
+│   │   └── teacher.css
+│   │
+│   ├── api.js
+│   ├── App.jsx
+│   ├── index.jsx
+│   └── routes (via App.jsx)
+│
+├── public/
+├── package.json
+└── README.md
+
+
+
+
+
+🔐 Authentication & Security
+
+JWT-based authentication
+
+Tokens stored in localStorage
+
+Automatic logout on token expiry
+
+Role-based route protection using ProtectedRoute
+
+Backend role guards using middleware
+
+
+
+
+📊 Seating Arrangement Flow (Important)
+
+Teacher uploads seating CSV for an exam
+
+File is stored in:
+
+Database (uploads collection)
+
+File system (/backend/uploads)
+
+Students click “View Seating”
+
+CSV is:
+
+Read from backend
+
+Parsed using PapaParse
+
+Displayed as a table on the frontend
+
+
+
+
+⚠️ No seating grid logic is used for students — CSV is shown directly as requested.
+
+▶️ How to Run the Project (IMPORTANT)
+✅ Step 1: Open two terminals
+Terminal 1 → Backend
+Terminal 2 → Frontend
+▶️ Backend Setup
+cd backend
+npm install
+
+
+Create a .env file:
+
+PORT=5000
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_secret_key
+ADMIN_EMAIL=admin@example.com
+ADMIN_PASS=admin123
+
+▶️ Run Backend
+node server.js
+
+
+Backend will start at:
+
+http://localhost:5000
+
+▶️ Frontend Setup
+cd frontend
+npm install
+
+▶️ Run Frontend
+npm start
+
+
+Frontend will start at:
+
+http://localhost:3000
+
+🔄 API Communication
+
+Frontend → Backend via Axios
+
+Base URL:
+
+http://localhost:5000/api
+
+
+JWT token automatically attached using Axios interceptors
+
+Unauthorized access redirects user to login
+
+
+
+
+📄 CSV Format (Seating Upload)
+
+Example CSV structure:
+
+rollNumber,seat,row,col
+CS101,R1-C1,1,1
+CS102,R1-C2,1,2
+
+
+Other column names are also supported as long as rollNumber exists.
+
+
+
+
+
+🧪 Error Handling & Logs
+
+Backend returns proper HTTP status codes
+
+Frontend shows fallback messages:
+
+“No seating uploaded yet”
+
+“Loading seating arrangement…”
+
+Console logs added for debugging (can be removed for production)
+
+
+                                  
+📌 Key Features Summary
+
+✔ Role-based dashboards
+✔ CSV seating upload & display
+✔ Secure authentication
+✔ Clean UI with sidebar layout
+✔ Admin approval workflow
+✔ Modular, scalable architecture
+
+
+
+                                  
+🚀 Future Enhancements (Optional)
+
+Seat grid visualization
+
+Email notifications
+
+Download seating as PDF
+
+Exam analytics dashboard
+
+Student-specific highlighting in CSV
+
+
+
